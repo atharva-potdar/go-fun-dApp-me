@@ -5,22 +5,19 @@ import {AggregatorV3Interface} from "@chainlink/contracts/src/v0.8/shared/interf
 
 contract FundMe {
 
+    // The below was all taken from Chainlink Data Feeds docs
     AggregatorV3Interface internal dataFeed;
     /**
-     * Network: Celo Alfajores
-     * Aggregator: CELO/USD
-     * Address: 0x022F9dCC73C5Fb43F2b4eF2EF9ad3eDD1D853946
+     * Network: Sepolia
+     * Aggregator: ETH/USD
+     * Address: 0x694AA1769357215DE4FAC081bf1f309aDC325306
      */
     constructor() {
         dataFeed = AggregatorV3Interface(
-            0x022F9dCC73C5Fb43F2b4eF2EF9ad3eDD1D853946
+            0x694AA1769357215DE4FAC081bf1f309aDC325306
         );
     }
-
-    uint8 public minimumINR = 15;
-
-        function getLatestCeloUSDRate() public view returns (int) {
-        // prettier-ignore
+    function getLatestSepoliaETHToUSDRate() public view returns (int) {
         (
             /* uint80 roundId */,
             int256 answer,
@@ -30,6 +27,11 @@ contract FundMe {
         ) = dataFeed.latestRoundData();
         return answer;
     }
+    // Chainlink VRF can be used to get PROVABLY random numbers, since blockchains are deterministic they can't produce randomness
+    // Chainlink Automation - event listeners!! :D
+    // Chainlink Functions - any API call in decentralized context - end-to-end reliability
+
+    uint8 minimumINR = 15;
 
     function fund() public payable {
         // We want to allow people to send money to this contract - payable keyword
