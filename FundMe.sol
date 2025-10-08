@@ -17,7 +17,7 @@ contract FundMe {
             0x694AA1769357215DE4FAC081bf1f309aDC325306
         );
     }
-    function getLatestSepoliaETHToUSDRate() public view returns (int) {
+    function getLatestSepoliaETHToUSDRate() public view returns (uint256) {
         (
             /* uint80 roundId */,
             int256 answer,
@@ -25,20 +25,20 @@ contract FundMe {
             /*uint256 updatedAt*/,
             /*uint80 answeredInRound*/
         ) = dataFeed.latestRoundData();
-        return answer;
+        return uint256(answer * 1e10);
     }
     // Chainlink VRF can be used to get PROVABLY random numbers, since blockchains are deterministic they can't produce randomness
     // Chainlink Automation - event listeners!! :D
     // Chainlink Functions - any API call in decentralized context - end-to-end reliability
 
-    uint8 minimumINR = 15;
+    uint256 minimumUSD = 5e18;
 
     function fund() public payable {
         // We want to allow people to send money to this contract - payable keyword
 
         // how to convert ETH to INR/INR to ETH? Use the Chainlink oracle
 
-        require(msg.value >= minimumINR, "min. 1 ETH required"); 
+        require(getConversionRate(msg.value) >= minimumUSD, "insufficient ETH sent"); 
         // 10^18 Wei = 1 ETH, msg value stores the value sent into the contract
 
         // If a transaction fails, the actions performed by the transaction
@@ -50,6 +50,10 @@ contract FundMe {
         // The following fields are present in a transaction - 
         // nonce, gas price, gas limit, to, 
         // value (the value we send), data, v,r,s(components of Tx signature)
+    }
+
+    function getConversionRate(uint256 ethValue) public view returns(uint256) {
+        return (ethValue * getLatestSepoliaETHToUSDRate()) / 1e18;
     }
 
     function withdraw() public {}
