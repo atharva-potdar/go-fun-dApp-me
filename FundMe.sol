@@ -32,6 +32,8 @@ contract FundMe {
     // Chainlink Functions - any API call in decentralized context - end-to-end reliability
 
     uint256 minimumUSD = 5e18;
+    address[] public funders;
+    mapping(address funder => uint256 valueFunded) public funderMoneyMap;
 
     function fund() public payable {
         // We want to allow people to send money to this contract - payable keyword
@@ -39,6 +41,9 @@ contract FundMe {
         // how to convert ETH to INR/INR to ETH? Use the Chainlink oracle
 
         require(getConversionRate(msg.value) >= minimumUSD, "insufficient ETH sent"); 
+	// msg.sender is the sender of this function
+	funders.push(msg.sender);
+	funderMoneyMap[msg.sender] += msg.value;
         // 10^18 Wei = 1 ETH, msg value stores the value sent into the contract
 
         // If a transaction fails, the actions performed by the transaction
