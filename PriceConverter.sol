@@ -3,28 +3,24 @@ pragma solidity >=0.8.30 <0.9.0;
 
 import {AggregatorV3Interface} from "@chainlink/contracts/src/v0.8/shared/interfaces/AggregatorV3Interface.sol";
 
-library priceConverter 
+library PriceConverter 
 {
-    // The below was all taken from Chainlink Data Feeds docs
-    AggregatorV3Interface internal dataFeed;
     /**
      * Network: Sepolia
      * Aggregator: ETH/USD
      * Address: 0x694AA1769357215DE4FAC081bf1f309aDC325306
      */
-    constructor() {
-        dataFeed = AggregatorV3Interface(
+    function getLatestSepoliaETHToUSDRate() internal view returns (uint256) {
+        AggregatorV3Interface priceFeed = AggregatorV3Interface(
             0x694AA1769357215DE4FAC081bf1f309aDC325306
         );
-    }
-    function getLatestSepoliaETHToUSDRate() internal view returns (uint256) {
         (
             /* uint80 roundId */,
             int256 answer,
             /*uint256 startedAt*/,
             /*uint256 updatedAt*/,
             /*uint80 answeredInRound*/
-        ) = dataFeed.latestRoundData();
+        ) = priceFeed.latestRoundData();
         return uint256(answer * 1e10);
     }
     // Chainlink VRF can be used to get PROVABLY random numbers, since blockchains are deterministic they can't produce randomness
