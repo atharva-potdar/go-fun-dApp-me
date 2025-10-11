@@ -1,35 +1,10 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
 pragma solidity >=0.8.30 <0.9.0;
 
-import {AggregatorV3Interface} from "@chainlink/contracts/src/v0.8/shared/interfaces/AggregatorV3Interface.sol";
+import {PriceConverter} from "./PriceConverter.sol";
 
 contract FundMe {
-
-    // The below was all taken from Chainlink Data Feeds docs
-    AggregatorV3Interface internal dataFeed;
-    /**
-     * Network: Sepolia
-     * Aggregator: ETH/USD
-     * Address: 0x694AA1769357215DE4FAC081bf1f309aDC325306
-     */
-    constructor() {
-        dataFeed = AggregatorV3Interface(
-            0x694AA1769357215DE4FAC081bf1f309aDC325306
-        );
-    }
-    function getLatestSepoliaETHToUSDRate() public view returns (uint256) {
-        (
-            /* uint80 roundId */,
-            int256 answer,
-            /*uint256 startedAt*/,
-            /*uint256 updatedAt*/,
-            /*uint80 answeredInRound*/
-        ) = dataFeed.latestRoundData();
-        return uint256(answer * 1e10);
-    }
-    // Chainlink VRF can be used to get PROVABLY random numbers, since blockchains are deterministic they can't produce randomness
-    // Chainlink Automation - event listeners!! :D
-    // Chainlink Functions - any API call in decentralized context - end-to-end reliability
+    using PriceConverter for uint256;
 
     uint256 minimumUSD = 5e18;
     address[] public funders;
@@ -40,7 +15,7 @@ contract FundMe {
 
         // how to convert ETH to INR/INR to ETH? Use the Chainlink oracle
 
-        require(getConversionRate(msg.value) >= minimumUSD, "insufficient ETH sent"); 
+        require(msg.value.getConversionRate() = minimumUSD, "insufficient ETH sent"); 
 	// msg.sender is the sender of this function
 	funders.push(msg.sender);
 	funderMoneyMap[msg.sender] += msg.value;
@@ -57,9 +32,10 @@ contract FundMe {
         // value (the value we send), data, v,r,s(components of Tx signature)
     }
 
-    function getConversionRate(uint256 ethValue) public view returns(uint256) {
-        return (ethValue * getLatestSepoliaETHToUSDRate()) / 1e18;
+    function withdraw() public {
+        for (uint256 funderIndex = 0; funderIndex < funders.length; funderIndex++) {
+            funderMoneyMap[funders[funderIndex]] = 0;
+        }
+	funders = new address[](0); // start at length 0
     }
-
-    function withdraw() public {}
 }
