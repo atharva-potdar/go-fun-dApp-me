@@ -10,6 +10,17 @@ contract FundMe {
     address[] public funders;
     mapping(address funder => uint256 valueFunded) public funderMoneyMap;
 
+    address owner;
+
+    constructor() {
+        owner = msg.sender;
+    }
+
+    modifier ownerOnly() {
+        require(msg.sender == owner, "Only owner can perform this transaction!");
+        _;
+    }
+
     function fund() public payable {
         // We want to allow people to send money to this contract - payable keyword
 
@@ -32,10 +43,12 @@ contract FundMe {
         // value (the value we send), data, v,r,s(components of Tx signature)
     }
 
-    function withdraw() public {
+    function withdraw() public ownerOnly {
         for (uint256 funderIndex = 0; funderIndex < funders.length; funderIndex++) {
             funderMoneyMap[funders[funderIndex]] = 0;
         }
-	funders = new address[](0); // start at length 0
+	    funders = new address[](0); // start at length 0
+        (bool callSuccess, ) = payable(msg.sender).call{value: address(this).balance}("");
+        require(callSuccess, "Withdraw call failed!");
     }
 }
